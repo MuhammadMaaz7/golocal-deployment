@@ -38,6 +38,7 @@ jobs:
         run: |
           echo "Configuring Docker to use Minikube's daemon..."
           eval $(minikube docker-env)
+          sleep 5  # Add a short delay to ensure Docker environment is fully set up
 
       # 5. Build backend Docker image
       - name: Build backend Docker image
