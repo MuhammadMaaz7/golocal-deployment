@@ -19,13 +19,15 @@ jobs:
         shell: pwsh
         run: |
           $maxAttempts = 5
+          $tempPath = "$env:GITHUB_RUNNER_TEMP" # Define path
           for ($i = 1; $i -le $maxAttempts; $i++) {
             try {
+              Write-Host "Attempt $i: Cleaning untracked files"
               git clean -fdx
               Write-Host "Clean successful"
               break
             } catch {
-              Write-Host "Attempt $i failed, retrying in 5 seconds..."
+              Write-Host "Attempt $i failed, retrying in 5 seconds... Error: $_"
               Start-Sleep -Seconds 5
             }
           }
