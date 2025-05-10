@@ -10,14 +10,6 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      # 1. Clean _temp folder manually (Windows-compatible)
-      - name: Manually clean _temp folder
-        shell: cmd
-        run: |
-          if exist "C:\actions-runner\_work\_temp" (rmdir /s /q "C:\actions-runner\_work\_temp") else (echo "_temp folder not found")
-          mkdir "C:\actions-runner\_work\_temp"
-
-
       # 2. Checkout using actions/checkout@v2 (downgraded for stability)
       - name: Checkout code
         uses: actions/checkout@v2
