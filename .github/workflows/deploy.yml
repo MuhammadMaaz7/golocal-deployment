@@ -10,37 +10,63 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          clean: false # Disable automatic cleanup
-
-      - name: Clean untracked files with retry logic
+      # 1. Clean _temp folder manually (Windows-compatible)
+      - name: Manually clean _temp folder
         run: |
-          for i in {1..5}; do
-            git clean -fdx && break || sleep 5;
-          done
+          if exist "C:\actions-runner\_work\_temp" (
+            rmdir /s /q "C:\actions-runner\_work\_temp"
+          )
+          mkdir "C:\actions-runner\_work\_temp"
+        shell: cmd
 
+      # 2. Checkout using actions/checkout@v2 (downgraded for stability)
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # 3. Clean untracked files (using PowerShell for retry logic on Windows)
+      - name: Clean untracked files with retry logic
+        shell: pwsh
+        run: |
+          $maxAttempts = 5
+          for ($i = 1; $i -le $maxAttempts; $i++) {
+            try {
+              git clean -fdx
+              Write-Host "Clean successful"
+              break
+            } catch {
+              Write-Host "Attempt $i failed, retrying in 5 seconds..."
+              Start-Sleep -Seconds 5
+            }
+          }
+
+      # 4. Configure Docker to use Minikube
       - name: Set up Docker to use Minikube's environment
+        shell: bash
         run: |
           echo "Configuring Docker to use Minikube's daemon..."
           eval $(minikube docker-env)
 
+      # 5. Build backend Docker image
       - name: Build backend Docker image
         run: docker build -t muhammadmaaz101/golocal-backend ./server
 
+      # 6. Build frontend Docker image
       - name: Build frontend Docker image
         run: docker build -t muhammadmaaz101/golocal-frontend ./client
 
+      # 7. Login to Docker Hub
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
+      # 8. Push backend image
       - name: Push backend image
         run: docker push muhammadmaaz101/golocal-backend
 
+      # 9. Push frontend image
       - name: Push frontend image
         run: docker push muhammadmaaz101/golocal-frontend
 
+      # 10. Deploy to Minikube
       - name: Deploy to Minikube
         run: |
           kubectl apply -f deployment/backend-deployment.yaml
