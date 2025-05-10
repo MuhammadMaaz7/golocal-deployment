@@ -13,6 +13,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Clean untracked files
+        run: git clean -fdx
+
       - name: Set up Docker to use Minikube's environment
         run: |
           echo "Configuring Docker to use Minikube's daemon..."
