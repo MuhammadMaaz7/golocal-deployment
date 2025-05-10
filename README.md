@@ -28,3 +28,5 @@ A local tourism management system built with the MERN stack.
 - `npm run dev`: Run the full-stack application in development mode
 - `npm run server`: Run only the backend server
 - `npm run client`: Run only the frontend client
+
+Need to be updated
