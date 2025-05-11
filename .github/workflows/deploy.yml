@@ -10,32 +10,6 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      # Clean workspace first using standard PowerShell
-      - name: Clean workspace with retry
-        shell: powershell
-        run: |
-          $maxRetries = 5
-          $retryCount = 0
-          $success = $false
-          
-          while ($retryCount -lt $maxRetries -and -not $success) {
-            try {
-              if (Test-Path "$env:GITHUB_WORKSPACE") {
-                Remove-Item -Path "$env:GITHUB_WORKSPACE" -Recurse -Force -ErrorAction Stop
-              }
-              $success = $true
-            } catch {
-              $retryCount++
-              Write-Host "Attempt $retryCount failed. Waiting 5 seconds before retry..."
-              Start-Sleep -Seconds 5
-            }
-          }
-          
-          if (-not $success) {
-            Write-Host "Failed to clean workspace after $maxRetries attempts"
-            exit 1
-          }
-
       # Checkout with newer action
       - name: Checkout code
         uses: actions/checkout@v4
@@ -46,7 +20,7 @@ jobs:
         run: |
           echo "Configuring Docker to use Minikube's daemon..."
           eval $(minikube docker-env)
-          sleep 5
+          sleep 5 
 
       # Build backend Docker image
       - name: Build backend Docker image
