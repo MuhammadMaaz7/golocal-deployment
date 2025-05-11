@@ -10,27 +10,35 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      # 2. Checkout using actions/checkout@v2 (downgraded for stability)
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      # 3. Clean untracked files (using PowerShell for retry logic on Windows)
-      - name: Clean untracked files with retry logic
+      # Clean workspace first
+      - name: Clean workspace with retry
         shell: pwsh
         run: |
-          $maxAttempts = 5
-          $tempPath = "$env:GITHUB_RUNNER_TEMP" # Define path
-          for ($i = 1; $i -le $maxAttempts; $i++) {
+          $maxRetries = 5
+          $retryCount = 0
+          $success = $false
+          
+          while ($retryCount -lt $maxRetries -and -not $success) {
             try {
-              Write-Host "Attempt $i: Cleaning untracked files"
-              git clean -fdx
-              Write-Host "Clean successful"
-              break
+              if (Test-Path "$env:GITHUB_WORKSPACE") {
+                Remove-Item -Path "$env:GITHUB_WORKSPACE" -Recurse -Force -ErrorAction Stop
+              }
+              $success = $true
             } catch {
-              Write-Host "Attempt $i failed, retrying in 5 seconds... Error: $_"
+              $retryCount++
+              Write-Host "Attempt $retryCount failed. Waiting 5 seconds before retry..."
               Start-Sleep -Seconds 5
             }
           }
+          
+          if (-not $success) {
+            Write-Host "Failed to clean workspace after $maxRetries attempts"
+            exit 1
+          }
+
+      # Checkout with newer action
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       # 4. Configure Docker to use Minikube
       - name: Set up Docker to use Minikube's environment
