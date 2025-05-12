@@ -164,10 +164,10 @@ jobs:
       - name: Deploy to Minikube
         run: |
           echo "Applying Kubernetes manifests..."
-          kubectl apply -f deployment/backend-deployment.yaml
-          kubectl apply -f deployment/backend-service.yaml
-          kubectl apply -f deployment/frontend-deployment.yaml
-          kubectl apply -f deployment/frontend-service.yaml
+          kubectl apply -f app/deployment/backend-deployment.yaml
+          kubectl apply -f app/deployment/backend-service.yaml
+          kubectl apply -f app/deployment/frontend-deployment.yaml
+          kubectl apply -f app/deployment/frontend-service.yaml
           
           echo "Deployment status:"
           kubectl get pods -o wide
