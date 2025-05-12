@@ -29,4 +29,4 @@ A local tourism management system built with the MERN stack.
 - `npm run server`: Run only the backend server
 - `npm run client`: Run only the frontend client
 
-i dont know if 
+Testing
