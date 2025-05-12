@@ -7,46 +7,97 @@ on:
 
 jobs:
   build-deploy:
-    # runs-on: self-hosted
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
-      # Checkout with newer action
+      # Cleanup temp files before checkout
+      - name: Cleanup previous run files
+        shell: powershell
+        run: |
+          # Stop any running runner processes that might lock files
+          Get-Process -Name "Runner.*" -ErrorAction SilentlyContinue | Stop-Process -Force
+          
+          # Clean temp directory
+          $tempPath = "$env:RUNNER_TEMP\_temp"
+          if (Test-Path $tempPath) {
+              Remove-Item -Path $tempPath -Recurse -Force -ErrorAction SilentlyContinue
+          }
+          
+          # Add delay to ensure cleanup completes
+          Start-Sleep -Seconds 3
+
+      # Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          clean: true  # Force fresh checkout
 
-      # Configure Docker to use Minikube
-      - name: Set up Docker to use Minikube's environment
-        shell: bash
+      # Verify and setup Docker with Minikube using PowerShell
+      - name: Configure Docker with Minikube
+        shell: powershell
         run: |
-          echo "Configuring Docker to use Minikube's daemon..."
-          eval $(minikube docker-env)
-          sleep 5 
+          # Verify current docker environment
+          Write-Host "Current Docker environment:"
+          docker info
+          
+          # Set Minikube docker environment
+          $minikubeEnv = minikube docker-env | Out-String
+          Invoke-Expression $minikubeEnv
+          
+          # Verify docker is now pointing to Minikube
+          Write-Host "Updated Docker environment:"
+          docker info
+          
+          # Add delay to ensure environment is stable
+          Start-Sleep -Seconds 5
 
       # Build backend Docker image
       - name: Build backend Docker image
+        shell: powershell
         run: docker build -t muhammadmaaz101/golocal-backend ./server
 
       # Build frontend Docker image
       - name: Build frontend Docker image
+        shell: powershell
         run: docker build -t muhammadmaaz101/golocal-frontend ./client
 
       # Login to Docker Hub
       - name: Login to Docker Hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        shell: powershell
+        run: |
+          $secretPassword = "${{ secrets.DOCKER_PASSWORD }}"
+          $secretPassword | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       # Push backend image
       - name: Push backend image
+        shell: powershell
         run: docker push muhammadmaaz101/golocal-backend
 
       # Push frontend image
       - name: Push frontend image
+        shell: powershell
         run: docker push muhammadmaaz101/golocal-frontend
 
       # Deploy to Minikube
       - name: Deploy to Minikube
+        shell: powershell
         run: |
           kubectl apply -f deployment/backend-deployment.yaml
           kubectl apply -f deployment/backend-service.yaml
           kubectl apply -f deployment/frontend-deployment.yaml
           kubectl apply -f deployment/frontend-service.yaml
+
+      # Post-job cleanup
+      - name: Post-job cleanup
+        if: always()  # Run even if previous steps fail
+        shell: powershell
+        run: |
+          # Clean up any remaining processes
+          Get-Process -Name "node","git","docker" -ErrorAction SilentlyContinue | 
+            Where-Object { $_.Path -like "$env:GITHUB_WORKSPACE*" } | 
+            Stop-Process -Force -ErrorAction SilentlyContinue
+          
+          # Clean temp files
+          if (Test-Path "$env:RUNNER_TEMP\_temp") {
+              Remove-Item -Path "$env:RUNNER_TEMP\_temp" -Recurse -Force -ErrorAction SilentlyContinue
+          }
