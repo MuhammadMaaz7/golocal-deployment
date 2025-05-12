@@ -143,10 +143,10 @@ jobs:
 
       # Build Docker images
       - name: Build backend image
-        run: docker build -t $DOCKER_HUB_USER/golocal-backend ./server
+        run: docker build -t $DOCKER_HUB_USER/golocal-backend ./app/server
 
       - name: Build frontend image
-        run: docker build -t $DOCKER_HUB_USER/golocal-frontend ./client
+        run: docker build -t $DOCKER_HUB_USER/golocal-frontend ./app/client
 
       # Login to Docker Hub
       - name: Login to Docker Hub
