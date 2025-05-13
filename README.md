@@ -3,7 +3,7 @@
 
 GoLocal Guide is a local tourism management system built using the MERN (MongoDB, Express, React, Node.js) stack. It allows tourists to discover destinations, connect with guides, and make reservations at local businesses.
 
-## 🚀 Features
+## Features
 
 - Destination discovery
 - Guide connections
@@ -13,9 +13,9 @@ GoLocal Guide is a local tourism management system built using the MERN (MongoDB
 
 ---
 
-## 🧑‍💻 Local Development (Node.js)
+## Local Development (Node.js)
 
-### 📦 Setup
+### Setup
 
 1. **Clone the repository**
    ```bash
@@ -42,22 +42,9 @@ GoLocal Guide is a local tourism management system built using the MERN (MongoDB
 
 ---
 
-## 📦 Project Structure
-
-```
-golocal-guide/
-│
-├── client/       # React frontend
-├── server/       # Express backend
-├── shared/       # Shared utilities and constants
-├── .env          # Environment variables
-├── docker/       # Docker-related config files
-└── k8s/          # Kubernetes YAMLs (deployment, service, namespace)
-```
-
 ---
 
-## 🧪 Available Scripts
+## Available Scripts
 
 | Command            | Description                           |
 |--------------------|---------------------------------------|
@@ -67,16 +54,16 @@ golocal-guide/
 
 ---
 
-## ☸️ Kubernetes Deployment (Minikube)
+## Kubernetes Deployment (Minikube)
 
-### 🛠️ Prerequisites
+### Prerequisites
 
 - Docker
 - Minikube
 - kubectl
 - A self-hosted GitHub Actions runner (if automating deployment)
 
-### 📦 Build Docker Image
+### Build Docker Image
 
 If you're using Minikube for building:
 
@@ -91,7 +78,7 @@ Or push to Docker Hub if using remote images:
 docker push your-dockerhub-username/golocal-app:latest
 ```
 
-### 🗂️ Deploy with Kubernetes
+### Deploy with Kubernetes
 
 1. Create a namespace:
 
@@ -102,11 +89,13 @@ kubectl create namespace golocal
 2. Apply Kubernetes manifests:
 
 ```bash
-kubectl apply -f k8s/deployment.yaml -n golocal
-kubectl apply -f k8s/service.yaml -n golocal
+kubectl apply -f deployment/backend-deployment.yaml.yaml -n golocal
+kubectl apply -f deployment/backend-service.yaml.yaml -n golocal
+kubectl apply -f deployment/frontend-deployment.yaml.yaml -n golocal
+kubectl apply -f deployment/frontend-service.yaml.yaml -n golocal
 ```
 
-### 🌐 Access the App
+### Access the App
 
 Run the following command to open the app in a browser:
 
@@ -114,6 +103,6 @@ Run the following command to open the app in a browser:
 minikube service frontend-service -n golocal
 ```
 
-> 📝 Note: If you're using Docker as your Minikube driver on Windows, it may open a tunnel (e.g., http://127.0.0.1:59870). Keep the terminal open to maintain access.
+> Note: If you're using Docker as your Minikube driver on Windows, it may open a tunnel (e.g., http://127.0.0.1:59870). Keep the terminal open to maintain access.
 
 ---
